@@ -1,12 +1,12 @@
 ﻿@implements IDisposable
 @inject PlayerService PlayerService
-@inject AudioInterop AudioJsInterop
+@inject IAudioInterop AudioJsInterop
 
 <audio @ref="AudioElementRef"
        src="@url"
        oncustomdurationchange="@OnDurationChange"
        oncustomtimeupdate="@OnTimeUpdate"
-       oncanplay="@OnCanPlay"
+       onplaybackratechange="@OnPlaybackRateChange"
        onplay="@OnPlay"
        onpause="@OnPause" />
 
@@ -14,7 +14,6 @@
     ElementReference AudioElementRef;
 
     private string? url;
-    private bool loadingUrl;
 
     protected override void OnInitialized()
     {
@@ -23,8 +22,10 @@
         PlayerService.EpisodeChanged += OnEpisodeChanged;
         PlayerService.PlayingChanged += OnPlayingChanged;
         PlayerService.TimeSought += OnTimeSought;
+        PlayerService.PlaybackRateChanged += OnPlaybackRateChanged;
 
         url = PlayerService.Episode?.Url;
+        AudioJsInterop.SetUri(url);
     }
 
     public void Dispose()
@@ -34,15 +35,18 @@
         PlayerService.EpisodeChanged -= OnEpisodeChanged;
         PlayerService.PlayingChanged -= OnPlayingChanged;
         PlayerService.TimeSought -= OnTimeSought;
+        PlayerService.PlaybackRateChanged -= OnPlaybackRateChanged;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await AudioJsInterop.SetMuted(AudioElementRef, PlayerService.IsMuted);
-            await AudioJsInterop.SetVolume(AudioElementRef, PlayerService.Volume);
+            await AudioJsInterop.SetMutedAsync(AudioElementRef, PlayerService.IsMuted);
+            await AudioJsInterop.SetVolumeAsync(AudioElementRef, PlayerService.Volume);
         }
+
+        await AudioJsInterop.SetPlaybackRateAsync(AudioElementRef, PlayerService.PlaybackRate);
     }
 
     private void OnDurationChange(DurationChangeEventArgs args)
@@ -55,13 +59,9 @@
         PlayerService.CurrentTime = args.CurrentTime;
     }
 
-    private async Task OnCanPlay(EventArgs args)
+    private void OnPlaybackRateChange(PlaybackRateChangeEventArgs args)
     {
-        loadingUrl = false;
-        if (PlayerService.IsPlaying)
-        {
-            await AudioJsInterop.Play(AudioElementRef);
-        }
+        PlayerService.PlaybackRate = args.PlaybackRate;
     }
 
     private void OnPlay(EventArgs args)
@@ -82,26 +82,23 @@
 
     private async void OnVolumeChanged(int volume)
     {
-        await AudioJsInterop.SetVolume(AudioElementRef, volume);
+        await AudioJsInterop.SetVolumeAsync(AudioElementRef, volume);
     }
 
     private async void OnMutedChanged(bool muted)
     {
-        await AudioJsInterop.SetMuted(AudioElementRef, muted);
+        await AudioJsInterop.SetMutedAsync(AudioElementRef, muted);
     }
 
     private async void OnPlayingChanged(bool play)
     {
-        if (!loadingUrl)
+        if (play)
         {
-            if (play)
-            {
-                await AudioJsInterop.Play(AudioElementRef);
-            }
-            else
-            {
-                await AudioJsInterop.Pause(AudioElementRef);
-            }
+            await AudioJsInterop.PlayAsync(AudioElementRef);
+        }
+        else
+        {
+            await AudioJsInterop.PauseAsync(AudioElementRef);
         }
     }
 
@@ -111,7 +108,7 @@
         if (url != newValue)
         {
             url = newValue;
-            loadingUrl = true;
+            AudioJsInterop.SetUri(url);
             await InvokeAsync(StateHasChanged);
         }
     }
@@ -120,7 +117,15 @@
     {
         if (time != null)
         {
-            await AudioJsInterop.SetCurrentTime(AudioElementRef, time.Value);
+            await AudioJsInterop.SetCurrentTimeAsync(AudioElementRef, time.Value);
+        }
+    }
+
+    private async void OnPlaybackRateChanged(double? playbackRate)
+    {
+        if (playbackRate.HasValue)
+        {
+            await AudioJsInterop.SetPlaybackRateAsync(AudioElementRef, playbackRate.Value);
         }
     }
 }

@@ -29,19 +29,19 @@ public class SettingsViewModel : BaseViewModel
         }
     }
 
-    public static string AppVersion { get => AppInfo.VersionString; }
+    public string AppVersion { get => AppInfo.VersionString; }
 
     public SettingsViewModel()
     {
-        isDarkModeEnabled = Settings.Theme == OSAppTheme.Dark;
+        isDarkModeEnabled = Settings.Theme == AppTheme.Dark;
         isWifiOnlyEnabled = Settings.IsWifiOnlyEnabled;
     }
 
     private void ChangeUserAppTheme(bool activateDarkMode)
     {
         Settings.Theme = activateDarkMode 
-            ? OSAppTheme.Dark
-            : OSAppTheme.Light;
+            ? AppTheme.Dark
+            : AppTheme.Light;
 
         TheTheme.SetTheme();
     }

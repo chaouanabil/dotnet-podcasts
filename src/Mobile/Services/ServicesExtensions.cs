@@ -1,5 +1,4 @@
-﻿using Microsoft.Maui.Hosting;
-using Podcast.Components;
+﻿using Podcast.Components;
 
 namespace Microsoft.NetConf2021.Maui.Services;
 
@@ -7,23 +6,19 @@ public static class ServicesExtensions
 {
     public static MauiAppBuilder ConfigureServices(this MauiAppBuilder builder)
     {
-        builder.Services.AddBlazorWebView();
+        builder.Services.AddMauiBlazorWebView();
         builder.Services.AddSingleton<SubscriptionsService>();
-        builder.Services.AddHttpClient<ShowsService>(client => 
-        {
-            client.BaseAddress = new Uri(Config.APIUrl);
-        });
+        builder.Services.AddSingleton<ShowsService>();
         builder.Services.AddSingleton<ListenLaterService>();
 #if WINDOWS
-            builder.Services.TryAddSingleton<IAudioService, Platforms.Windows.AudioService>();
-            builder.Services.TryAddTransient<IShareService, Platforms.Windows.ShareService>();
+        builder.Services.TryAddSingleton<SharedMauiLib.INativeAudioService, SharedMauiLib.Platforms.Windows.NativeAudioService>();
 #elif ANDROID
-        builder.Services.TryAddSingleton<IAudioService, Platforms.Android.AudioService>();
+        builder.Services.TryAddSingleton<SharedMauiLib.INativeAudioService, SharedMauiLib.Platforms.Android.NativeAudioService>();
 #elif MACCATALYST
-            builder.Services.TryAddSingleton<IAudioService, Platforms.MacCatalyst.AudioService>();
-            builder.Services.TryAddSingleton< Platforms.MacCatalyst.ConnectivityService>();
+        builder.Services.TryAddSingleton<SharedMauiLib.INativeAudioService, SharedMauiLib.Platforms.MacCatalyst.NativeAudioService>();
+        builder.Services.TryAddSingleton< Platforms.MacCatalyst.ConnectivityService>();
 #elif IOS
-        builder.Services.TryAddSingleton<IAudioService, Platforms.iOS.AudioService>();
+        builder.Services.TryAddSingleton<SharedMauiLib.INativeAudioService, SharedMauiLib.Platforms.iOS.NativeAudioService>();
 #endif
 
         builder.Services.TryAddTransient<WifiOptionsService>();

@@ -5,20 +5,20 @@
              xmlns:view="clr-namespace:Microsoft.NetConf2021.Maui.Views"
              Style="{StaticResource DetailPageStyle}"
              xmlns:controls="clr-namespace:Microsoft.NetConf2021.Maui.Controls"
+             xmlns:res="clr-namespace:Microsoft.NetConf2021.Maui.Resources.Strings"
              x:Class="Microsoft.NetConf2021.Maui.Pages.CategoryPage">
-    <ContentPage.BindingContext>
-        <viewmodels:CategoryViewModel />
-    </ContentPage.BindingContext>
     <CollectionView ItemsSource="{Binding Shows}"
-                    Margin="10">
+                    Margin="10"
+                    Background="{AppThemeBinding Light={StaticResource Grey1}, Dark={StaticResource Grey9}}">
         <CollectionView.Header>
             <StackLayout>
                 <controls:HeaderControl TextToSearch="{Binding Text, Mode=OneWayToSource}"
                                         SearchCommand="{Binding SearchCommand}"
+                                        SemanticProperties.Description="{x:Static res:AppResource.Semantic_Description_Tap_Search}"
                                         Margin="5"
                                         ShowSearchCategories="False"
                                         IsVisible="{OnIdiom Default=true, Phone=false}"
-                                        GridLayout.Row="0"
+                                        Grid.Row="0"
                                         VerticalOptions="Start" />
 
                 <Label Text="{Binding Category.Genre}"
@@ -35,7 +35,8 @@
         <CollectionView.ItemTemplate>
             <DataTemplate>
                 <view:ShowItemView SubscriptionCommand="{Binding SubscribeCommand, Source={RelativeSource AncestorType={x:Type viewmodels:CategoryViewModel}}}"
-                                   SubscriptionCommandParameter="{Binding }" />
+                                   SubscriptionCommandParameter="{Binding }"
+                                   SemanticProperties.Description="{x:Static res:AppResource.Semantic_Description_Tap_Select}"/>
             </DataTemplate>
         </CollectionView.ItemTemplate>
     </CollectionView>

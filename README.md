@@ -1,6 +1,23 @@
+---
+page_type: sample
+description: ".NET 6 reference application shown at .NET Conf 2021 featuring ASP.NET Core, Blazor, .NET MAUI, Microservices, and more!"
+languages:
+- csharp
+products:
+- dotnet-core
+- ef-core
+- blazor
+- xamarin
+- azure-sql-database
+- azure-storage
+- azure-container-apps
+- azure-container-registry
+- azure-app-service-web
+---
+
 # .NET Podcasts - Sample Application
 
-We are happy to announce the release of .NET Podcast App: a sample application showcasing [.NET 6](https://dotnet.microsoft.com/download/dotnet/6.0), [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet), [Blazor](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor), [.NET MAUI](https://docs.microsoft.com/dotnet/maui/what-is-maui), [Azure Container Apps](https://azure.microsoft.com/services/container-apps/#overview), and more.
+The .NET Podcast app is a sample application showcasing [.NET 6](https://dotnet.microsoft.com/download/dotnet/6.0), [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet), [Blazor](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor), [.NET MAUI](https://dotnet.microsoft.com/apps/maui), [Azure Container Apps](https://azure.microsoft.com/services/container-apps/#overview), [Orleans](https://docs.microsoft.com/dotnet/orleans/overview), and more.
 
 You can browse a [live running version of the .NET Podcasts app](https://dotnetpodcasts.azurewebsites.net/) powered by ASP.NET Core and Blazor.
 
@@ -22,11 +39,11 @@ You can browse a [live running version of the .NET Podcasts app](https://dotnetp
 
 ## Repositories
 
-For this sample application, we build an app to listen all you favorite .NET podcasts for all the ecosystems: Web, Android, iOS, macOS and Windows. You can find the different apps separated by folders in this repo:
+For this sample application, we build an app to listen all your favorite .NET podcasts for all the ecosystems: Web, Android, iOS, macOS and Windows. You can find the different apps separated by folders in this repo:
 
 - [Mobile & Desktop:](src/Mobile) Native .NET MAUI Application for iOS, Android, macOS, and Windows
 - [Website:](src/Web) Blazor WebAssembly app and ASP.NET Core Razor Marketing website
-- [Backend API:](src/Services) ASP.NET Core Web APIs & Minimal APIs, injestion worker, and podcast update worker
+- [Backend API:](src/Services) ASP.NET Core Web APIs & Minimal APIs, ingestion worker, and podcast update worker
 - [Blazor Hybrid App:](src/MobileBlazor) Sample hybrid application of .NET MAUI with Blazor.
 
 ## Full Deployment with GitHub Actions
@@ -63,6 +80,12 @@ Ensure that the following services are running in Docker, note that you only nee
 
 ![Configured Docker services](docs/docker/docker-services-config.png)
 
+## Local Deployment with Visual Studio
+
+1. First install [Docker Desktop](https://www.docker.com/products/docker-desktop)
+2. Clone the repository and navigate to the root directory in a terminal
+3. Open the solution `NetPodcast.sln`, set the start project to `docker-compose` and hit F5. To optimize debugging while running all services, please refer to [Launch a subset of Compose services documentation.](https://docs.microsoft.com/visualstudio/containers/launch-profiles)
+4. By default, the Podcast.Api's swagger endpoint will be launched. Navigate to `localhost:5002` for the web application. If you see any errors, wait for a while and refresh the page.
 
 ## Contributing
 

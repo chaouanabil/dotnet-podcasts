@@ -121,7 +121,7 @@
     <value>Autodownload using data</value>
   </data>
   <data name="Autodownload_Using_Data_Subtitle" xml:space="preserve">
-    <value>Turn on to alow to download over cellular data if wifi is unavailable.</value>
+    <value>Turn on to allow to download over cellular data if wifi is unavailable.</value>
   </data>
   <data name="Categories" xml:space="preserve">
     <value>Categories</value>
@@ -167,6 +167,33 @@
   </data>
   <data name="Play" xml:space="preserve">
     <value>Play</value>
+  </data>
+  <data name="See_All_Categories" xml:space="preserve">
+    <value>See All Categories</value>
+  </data>
+  <data name="Semantic_Description_Tap_Listen_Later" xml:space="preserve">
+    <value>Tap to listen later</value>
+  </data>
+  <data name="Semantic_Description_Tap_Play_Episode" xml:space="preserve">
+    <value>Tap to play or pause an episode</value>
+  </data>
+  <data name="Semantic_Description_Tap_Search" xml:space="preserve">
+    <value>Tap to search text</value>
+  </data>
+  <data name="Semantic_Description_Tap_See_All_Categories" xml:space="preserve">
+    <value>Tap to see all categories</value>
+  </data>
+  <data name="Semantic_Description_Tap_Select" xml:space="preserve">
+    <value>Tap to select a category</value>
+  </data>
+  <data name="Semantic_Description_Tap_Subscribe_Podcast" xml:space="preserve">
+    <value>Tap to subscribe a podcast</value>
+  </data>
+  <data name="Semantic_Description_Toggle_Mode" xml:space="preserve">
+    <value>Enable or disable dark mode</value>
+  </data>
+  <data name="Semantic_Description_Toggle_Wifi" xml:space="preserve">
+    <value>Enable or disable wifi settings</value>
   </data>
   <data name="Settings" xml:space="preserve">
     <value>Settings</value>

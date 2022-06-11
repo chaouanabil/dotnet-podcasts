@@ -2,13 +2,30 @@
 
 public partial class Player : ContentView
 {   
-    private readonly PlayerService playerService;
+    private PlayerService playerService;
     
     public Player()
     {
         InitializeComponent();
-        this.playerService = ServicesProvider.GetService<PlayerService>();
+        AutomationProperties.SetIsInAccessibleTree(this, true);
         this.IsVisible = false;
+
+#if WINDOWS || MACCATALYST
+        this.HeightRequest = 90;
+#elif ANDROID || IOS
+        this.HeightRequest = 70;
+#endif
+    }
+
+    protected override void OnHandlerChanged()
+    {
+        base.OnHandlerChanged();
+
+        if (playerService == null)
+        {
+            this.playerService = this.Handler.MauiContext.Services.GetService<PlayerService>();
+            InitPlayer();
+        }
     }
 
     private async void PlayGesture_Tapped(object sender, EventArgs e)
@@ -18,6 +35,14 @@ public partial class Player : ContentView
 
     internal void OnAppearing()
     {
+        InitPlayer();  
+    }
+
+    void InitPlayer()
+    {
+        if (playerService == null)
+            return;
+
         this.playerService.IsPlayingChanged += PlayerService_IsPlayingChanged;
         IsVisible = playerService.CurrentEpisode != null;
         if (this.playerService.CurrentEpisode != null)

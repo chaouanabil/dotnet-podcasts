@@ -1,102 +1,114 @@
-﻿namespace Microsoft.NetConf2021.Maui.Services
+﻿using SharedMauiLib;
+
+namespace Microsoft.NetConf2021.Maui.Services;
+
+public class PlayerService
 {
-    class PlayerService
+    private readonly INativeAudioService audioService;
+    private readonly WifiOptionsService wifiOptionsService;
+
+    public Episode CurrentEpisode { get; set; }
+    public Show CurrentShow { get; set; }
+
+    public bool IsPlaying { get; set; }
+    public double CurrentPosition => audioService.CurrentPosition;
+
+    public event EventHandler NewEpisodeAdded;
+    public event EventHandler IsPlayingChanged;
+
+    public PlayerService(INativeAudioService audioService, WifiOptionsService wifiOptionsService)
     {
-        private readonly IAudioService audioService;
-        private readonly WifiOptionsService wifiOptionsService;
+        this.audioService = audioService;
+        this.wifiOptionsService = wifiOptionsService;
 
-        public Episode CurrentEpisode { get; set; }
-        public Show CurrentShow { get; set; }
-
-        public bool IsPlaying { get; set; }
-        public double CurrentPosition => audioService.CurrentPosition;
-
-        public event EventHandler NewEpisodeAdded;
-        public event EventHandler IsPlayingChanged;
-
-        public PlayerService(IAudioService audioService, WifiOptionsService wifiOptionsService)
+        this.audioService.IsPlayingChanged += (object sender, bool e) =>
         {
-            this.audioService = audioService;
-            this.wifiOptionsService = wifiOptionsService;
+            IsPlaying = e;
+            IsPlayingChanged?.Invoke(this, EventArgs.Empty);
+        };
+    }
+
+    public async Task PlayAsync(Episode episode, Show show, bool isPlaying, double position = 0)
+    {
+        if (episode == null) { return; }
+
+        var isOtherEpisode = CurrentEpisode?.Id != episode.Id;
+
+        CurrentShow = show;
+
+        if (isOtherEpisode)
+        {
+            CurrentEpisode = episode;
+
+            if (audioService.IsPlaying)
+            {
+                await InternalPauseAsync();
+            }
+
+            await audioService.InitializeAsync(CurrentEpisode.Url.ToString());
+
+            await InternalPlayPauseAsync(isPlaying, position);
+
+            NewEpisodeAdded?.Invoke(this, EventArgs.Empty);
+        }
+        else
+        {
+            await InternalPlayPauseAsync(isPlaying, position);
         }
 
-        public async Task PlayAsync(Episode episode, Show show, bool isPlaying, double position = 0)
+        IsPlayingChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+
+    public Task PlayAsync(Episode episode, Show show)
+    {
+        var isOtherEpisode = CurrentEpisode?.Id != episode.Id;
+        var isPlaying = isOtherEpisode || !audioService.IsPlaying;
+        var position = isOtherEpisode ? 0 : CurrentPosition;
+
+        if (CurrentEpisode != null)
         {
-            if (episode == null) { return; }
-
-            var isOtherEpisode = CurrentEpisode?.Id != episode.Id;
-
-            CurrentShow = show;
-
-            if (isOtherEpisode)
+            if (isPlaying)
             {
-                CurrentEpisode = episode;
-
-                if (audioService.IsPlaying)
-                {
-                    await InternalPauseAsync();
-                }
-
-                await audioService.InitializeAsync(CurrentEpisode.Url.ToString());
-
-                if (isPlaying)
-                {
-                    await InternalPlayAsync(initializePlayer: false, position);
-                }
-                else
-                {
-                    await InternalPauseAsync();
-                }
-
-                NewEpisodeAdded?.Invoke(this, EventArgs.Empty);
+                SemanticScreenReader.Announce(string.Format("Episode with title {0} will start playing", CurrentEpisode.Title));
             }
             else
             {
-                if (isPlaying)
-                {
-                    await InternalPlayAsync(initializePlayer: false, position);
-                }
-                else
-                {
-                    await InternalPauseAsync();
-                }
+                SemanticScreenReader.Announce(string.Format("Episode with title {0} will be paused", CurrentEpisode.Title));
             }
-
-            IsPlayingChanged?.Invoke(this, EventArgs.Empty);
         }
 
+        return PlayAsync(episode, show, isPlaying, position);
+    }
 
-        public Task PlayAsync(Episode episode, Show show)
+    private async Task InternalPlayPauseAsync(bool isPlaying, double position)
+    {
+        if (isPlaying)
         {
-            var isOtherEpisode = CurrentEpisode?.Id != episode.Id;
-            var isPlaying = isOtherEpisode || !audioService.IsPlaying;
-            var position = isOtherEpisode ? 0 : CurrentPosition;
-
-            return PlayAsync(episode, show, isPlaying, position);
+            await InternalPlayAsync(position);
         }
-
-        private async Task InternalPauseAsync()
+        else
         {
-            await audioService.PauseAsync();
-            IsPlaying = false;
+            await InternalPauseAsync();
         }
+    }
 
-        private async Task InternalPlayAsync(bool initializePlayer = false, double position = 0)
+    private async Task InternalPauseAsync()
+    {
+        await audioService.PauseAsync();
+        IsPlaying = false;
+    }
+
+    private async Task InternalPlayAsync(double position = 0)
+    {
+        var canPlay = await wifiOptionsService.HasWifiOrCanPlayWithOutWifiAsync();
+
+        if (!canPlay)
         {
-            var canPlay = await wifiOptionsService.HasWifiOrCanPlayWithOutWifiAsync();
-
-            if (!canPlay)
-            {
-                return;
-            }
-
-            if (initializePlayer)
-            {
-                await audioService.InitializeAsync(CurrentEpisode.Url.ToString());
-            }
-
-            await audioService.PlayAsync(position);
-            IsPlaying = true;
+            return;
         }
+
+        await audioService.PlayAsync(position);
+        IsPlaying = true;
     }
 }
